@@ -1830,8 +1830,8 @@ function doLogin() {
     stats: { sessions:1, calculations:0, images:0, reports:0 }
   };
 
-  // Persist across refreshes.
-  try { localStorage.setItem('ciq_session', JSON.stringify(SESSION)); } catch(_){}
+  // Session is in-memory only — login screen always shows on fresh page load.
+  try { localStorage.removeItem('ciq_session'); } catch(_){}
 
   document.getElementById('navName').textContent = name;
   document.getElementById('navAvatar').textContent = name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
@@ -1861,25 +1861,8 @@ function doLogout() {
   toast('Signed out', 'steel');
 }
 
-// Auto-restore previous session — skips the name-entry screen on refresh.
-(function restoreSession(){
-  try{
-    const raw = localStorage.getItem('ciq_session');
-    if(!raw) return;
-    const s = JSON.parse(raw);
-    if(!s || !s.name) return;
-    // Defer to next tick so DOM elements exist.
-    document.addEventListener('DOMContentLoaded', ()=>{
-      const auth = document.getElementById('authScreen');
-      const main = document.getElementById('mainApp');
-      const nameInp = document.getElementById('authName');
-      if(!auth || !main || !nameInp) return;
-      nameInp.value = s.name;
-      // Use the existing flow so all UI labels are populated correctly.
-      try { doLogin(); } catch(e){ console.warn('restore failed', e); }
-    });
-  }catch(e){ /* ignore */ }
-})();
+// Session auto-restore disabled — login page always shows on load.
+// (Previous: auto-skipped login if localStorage session existed)
 
 
 /* ═══ Detector Target Grade hint ═══ */
